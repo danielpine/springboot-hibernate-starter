@@ -16,15 +16,31 @@ import io.danielpine.github.repository.DeskGroupRepository;
 @SpringBootTest
 public class DeskGroupRepositoryTests {
 
-	@Autowired
-	private DeskGroupRepository deskGroupRepository;
+    @Autowired
+    private DeskGroupRepository deskGroupRepository;
 
-	@Test
-	void test() {
-//		List<DeskGroup> findAll = deskGroupRepository.findAll();
-		Optional<DeskGroup> findById = deskGroupRepository.findById(15L);
-		DeskGroup deskGroup = findById.get();
-		System.out.println("Task:: " + deskGroup);
+    @Test
+    void test() {
+	Optional<DeskGroup> findById = deskGroupRepository.findById(1L);
+	DeskGroup deskGroup = findById.get();
+	System.out.println("Task:: " + deskGroup);
+
+    }
+
+    @Test
+    void testall() {
+	List<DeskGroup> list = deskGroupRepository.findAllWithEG();
+	System.out.println(list);
+    }
+
+    @Test
+    void testOne() {
+	try {
+	    DeskGroup g = deskGroupRepository.findOneById(1L);
+	    System.out.println(g);
+	} catch (Exception e) {
+	    e.printStackTrace();
 	}
+    }
 
 }
