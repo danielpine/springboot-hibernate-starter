@@ -13,14 +13,14 @@ import io.danielpine.github.entity.DeskGroup;
 public interface DeskGroupRepository extends JpaRepository<DeskGroup, Long> {
     public Optional<DeskGroup> findById(Long id);
 
-    @EntityGraph(value =   "desk.teller"  , type = EntityGraphType.FETCH)
+    @EntityGraph(value = "desk.teller", type = EntityGraphType.FETCH)
     public DeskGroup findOneById(Long id);
 
-    @EntityGraph(attributePaths = { "desk.teller" })
+    @EntityGraph(attributePaths = {"desk.teller"})
     @Query("from DeskGroup")
     public List<DeskGroup> findAllWithEG();
 
-    @EntityGraph(attributePaths = { "desk" })
+    @EntityGraph(attributePaths = {"desk"})
     @Query("from DeskGroup")
     public List<DeskGroup> findAllWithEG2();
 }

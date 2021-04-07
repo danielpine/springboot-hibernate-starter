@@ -21,33 +21,3 @@ public class HibernateOneApplication {
 	}
 
 }
-
-//@Component
-class InitCommandLineRunner implements CommandLineRunner {
-
-	@Autowired
-	private DeskGroupRepository deskGroupRepository;
-	@Autowired
-	private DeskRepository deskRepository;
-	@Autowired
-	private TellerRepository tellerRepository;
-
-	@Override
-	public void run(String... args) throws Exception {
-		DeskGroup deskGroup = new DeskGroup();
-		deskGroup.setId(1L);
-		deskGroup.setName("group_name_" + 1);
-		DeskGroup save = deskGroupRepository.save(deskGroup);
-		Desk desk = new Desk();
-		desk.setGroup(save);
-		desk.setId(2L);
-		desk.setName("desk_name_" + 2);
-		Desk save2 = deskRepository.save(desk);
-		Teller teller = new Teller();
-		teller.setDesk(save2);
-		teller.setId(3L);
-		teller.setName("teller_name_" + 3);
-		tellerRepository.save(teller);
-		System.out.println("calling -> InitCommandLineRunner");
-	}
-}
