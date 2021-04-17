@@ -23,6 +23,8 @@ spring:
       ddl-auto: update
     show-sql: true
 logging:
+  config: classpath:logback-spring.xml
   level:
     org.springframework.web: debug
     io.danielpine.github.controller: debug
+    

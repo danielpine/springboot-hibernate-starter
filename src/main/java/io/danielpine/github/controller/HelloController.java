@@ -5,8 +5,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.danielpine.github.entity.DeskGroup;
@@ -31,10 +33,16 @@ public class HelloController {
 		hi();
 		return "Hello Hibenate!";
 	}
-	
-	public String hi() { 
+
+	public String hi() {
 		log.trace("this is trace log");
 		return "Hello Hibenate!";
+	}
+
+	@RequestMapping("/user/{username}")
+	@ResponseBody
+	public String getUerBlog(@PathVariable String username) {
+		return "user: " + username;
 	}
 
 	@RequestMapping(value = "/all", method = RequestMethod.GET)
