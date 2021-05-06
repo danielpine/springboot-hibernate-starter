@@ -1,28 +1,6 @@
-server:
-  #配置端口号
-  port: 8686
- 
 spring:
   profiles:
-      active: 
-        -test
+    active: test
   application:
-    name: zipkin-client-service
-  zipkin:
-    base-url: http://192.168.0.103:9411
-    enabled: true
-    service: 
-      name: zipkin-client-service   #默认会显示Spring Application Name，但是可以覆盖Service地址
-    sender: 
-      type: web
-  sleuth:
-    sampler:
-      probability: 1.0  #100%取样
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-logging:
-  level:
-    org.springframework.web: debug
-    io.danielpine.github.controller: debug
+    name: zipkin-client
+

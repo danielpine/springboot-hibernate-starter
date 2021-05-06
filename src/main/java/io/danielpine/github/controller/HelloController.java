@@ -24,16 +24,11 @@ public class HelloController {
 		log.error("this is error log");
 		log.debug("this is debug log");
 		log.warn("this is warn log");
-		log.trace("this is trace log");
-		log.trace("this is trace log");
-		log.trace("this is trace log");
-		log.trace("this is trace log");
 		hi();
 		return "Hello Hibenate!";
 	}
 	
 	public String hi() { 
-		log.trace("this is trace log");
 		return "Hello Hibenate!";
 	}
 
