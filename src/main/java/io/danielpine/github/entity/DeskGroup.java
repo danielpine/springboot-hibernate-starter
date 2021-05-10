@@ -1,5 +1,7 @@
 package io.danielpine.github.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -23,7 +25,7 @@ public class DeskGroup {
 
     private String name;
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "group", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private List<Desk> desk;
 
     public Long getId() {

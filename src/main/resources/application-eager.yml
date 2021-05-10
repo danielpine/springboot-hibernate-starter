@@ -1,0 +1,25 @@
+server:
+  #配置端口号
+  port: 8686
+
+spring:
+  application:
+    name: zipkin-client
+  sleuth:
+    sampler:
+      probability: 1.0  #100%取样
+  datasource:
+    url: jdbc:h2:~/test
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 123456
+  jpa:
+    database: h2
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  h2:
+    console:
+      path: /h2-console
+      enabled: true
+
