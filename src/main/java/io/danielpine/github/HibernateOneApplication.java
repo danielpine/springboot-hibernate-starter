@@ -12,7 +12,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.sleuth.instrument.web.TraceWebServletAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -23,6 +26,8 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 
 @SpringBootApplication
+@EnableJpaRepositories
+@Import(RepositoryRestMvcConfiguration.class)
 public class HibernateOneApplication {
 
     public static void main(String[] args) {

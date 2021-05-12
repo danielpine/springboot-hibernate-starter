@@ -3,8 +3,6 @@ server:
   port: 8686
 
 spring:
-  application:
-    name: zipkin-client
   sleuth:
     sampler:
       probability: 1.0  #100%取样

@@ -23,7 +23,7 @@ import io.danielpine.github.repository.DeskRepository;
 import io.danielpine.github.repository.TellerRepository;
 
 
-@ActiveProfiles("eager")
+@ActiveProfiles("test")
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class DeskGroupRepositoryTests {
@@ -49,17 +49,13 @@ public class DeskGroupRepositoryTests {
     @Test
     public void testall() {
         List<DeskGroup> list = deskGroupRepository.findAllWithEG();
-        System.out.println(list);
+        System.out.println(JSONObject.toJSONString(list, true));
     }
 
     @Test
     public void testOne() {
-        try {
-            DeskGroup g = deskGroupRepository.findOneById(1L);
-            System.out.println(g);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        DeskGroup g = deskGroupRepository.findOneById(1L);
+        System.out.println(g);
     }
 
 }

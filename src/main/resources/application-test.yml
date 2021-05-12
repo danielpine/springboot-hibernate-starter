@@ -1,22 +1,18 @@
-server:
-  #配置端口号
-  port: 8686
+vm:
+  host: 192.168.142.134
 
 spring:
   application:
-    name: zipkin-client
-
+    name: zipkin-client-service
   rabbitmq:
     port: 5672
-    host: 192.168.142.136
+    host: ${vm.host}
     username: admin
     password: admin
 
   zipkin:
-    base-url: http://192.168.142.136:9411
+    base-url: http://${vm.host}:9411
     enabled: true
-    service:
-      name: zipkin-client-service   #默认会显示Spring Application Name，但是可以覆盖Service地址
     sender:
       type: web
 
@@ -35,12 +31,17 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        max_fetch_depth: 2
 
   h2:
     console:
       path: /h2-console
       enabled: true
-
 logging:
   level:
-    config: classpath:logback-spring.xml
+    io.danielpine.github.repository: debug
+  config:
+    classpath: logback-spring.xml

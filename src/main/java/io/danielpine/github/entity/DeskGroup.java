@@ -14,10 +14,7 @@ import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 
 @Entity
-@NamedEntityGraph(name = "desk.teller", attributeNodes = {
-	@NamedAttributeNode(value = "desk"),
-})
-
+@NamedEntityGraph(name = "DeskGroup.Graph", attributeNodes = {@NamedAttributeNode("desk")})
 public class DeskGroup {
     @Id
     @GeneratedValue
@@ -25,31 +22,31 @@ public class DeskGroup {
 
     private String name;
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "group", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<Desk> desk;
 
     public Long getId() {
-	return id;
+        return id;
     }
 
     public void setId(Long id) {
-	this.id = id;
+        this.id = id;
     }
 
     public String getName() {
-	return name;
+        return name;
     }
 
     public void setName(String name) {
-	this.name = name;
+        this.name = name;
     }
 
     public List<Desk> getDesk() {
-	return desk;
+        return desk;
     }
 
     public void setDesk(List<Desk> desk) {
-	this.desk = desk;
+        this.desk = desk;
     }
 
 }

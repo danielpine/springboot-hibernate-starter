@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
+    <title>Title</title>
+  </head>
+
+  <body>
+    <!-- 评论列表展示区域 -->
+    <div id="app-listcomments" style="width: 80%; margin: auto">
+      <publish @func="getlocalinfo"></publish>
+      <br />
+      <div class="container">
+        <ul class="list-group">
+          <li
+            class="
+              list-group-item
+              d-flex
+              justify-content-between
+              align-items-center
+            "
+            v-for="item in list"
+            :key="item.id"
+          >
+            {{ item.content }}
+            <span class="badge badge-secondary badge-pill"
+              >{{ item.user }}</span
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 提交评论的表单组件 -->
+    <template id="publish">
+      <div>
+        <div class="card border-info">
+          <div class="card-header">评论系统</div>
+          <div class="card-body">
+            <div class="container">
+              <form>
+                <div class="form-group">
+                  <label for="user"> 评论人: </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="user"
+                    v-model="user"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="content"> 评论内容: </label>
+                  <textarea
+                    id="content"
+                    class="form-control"
+                    v-model="content"
+                  ></textarea>
+                </div>
+                <input
+                  type="button"
+                  value="评论"
+                  class="btn btn-primary"
+                  @click="getinfo"
+                />
+                <input
+                  type="button"
+                  value="发表"
+                  class="btn btn-primary"
+                  @click="postComment"
+                />
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://www.w3school.com.cn/jquery/jquery-1.11.1.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+      //组件创建（使用局部组件方式）
+      var publish = {
+        data() {
+          return {
+            user: '',
+            content: ''
+          }
+        },
+        template: '#publish',
+        methods: {
+          postComment() {
+            axios
+              .post('http://localhost:8686/comments', {
+                articleId: 1,
+                commentFromUid: 1,
+                commentToUid: 1,
+                content: '今天天气真好'
+              })
+              .then((res) => {
+                console.log(res) //  处理成功的函数 相当于success
+              })
+              .catch((error) => {
+                console.log(error) //  错误处理 相当于error
+              })
+          },
+          getinfo() {
+            //获得输入框的user及content数据并更新到评论列表
+            if (this.user == '' || this.content == '') {
+              //判断输入框是否为空
+              alert('输入框请不要留空白')
+            } else {
+              const info = {
+                id: Math.random(),
+                user: this.user,
+                content: this.content
+              } //获取用户输入的数据存到info对象中
+              const list = JSON.parse(localStorage.getItem('cmts') || '[]') //获取localstrage中的数据，字符串类型需要转换为json对象
+              list.push(info) //将得到的info对象的添加到list
+              localStorage.setItem('cmts', JSON.stringify(list)) //将更新好的数据重新添加到localstrage
+              this.user = this.content = '' //清空输入框
+              this.$emit('func') //更新页面的评论列表
+            }
+          }
+        }
+      }
+      //vue实例部分创建
+      const listcomment = new Vue({
+        el: '#app-listcomments',
+        data: {
+          list: [
+            {
+              id: Math.random(),
+              user: '林宥嘉',
+              content: '多久了我都没变，爱你这回事整整六年'
+            },
+            {
+              id: Math.random(),
+              user: '华晨宇',
+              content: '看着飞舞的尘埃掉下来'
+            }
+          ],
+          articleId: 1
+        },
+        created() {
+          const localinfo = JSON.parse(localStorage.getItem('cmts') || '[]')
+          if (localinfo.length == 0) {
+            const list = this.list
+            localStorage.setItem('cmts', JSON.stringify(list))
+          }
+          this.getlocalinfo()
+          this.getComment()
+        },
+        components: {
+          publish: publish
+        },
+        methods: {
+          getComment() {
+            axios
+              .get('http://localhost:8686/comments')
+              .then((res) => {
+                console.log(res) //  处理成功的函数 相当于success
+              })
+              .catch((error) => {
+                console.log(error) //  错误处理 相当于error
+              })
+            $.ajax({
+              type: 'GET',
+              url: 'http://localhost:8686/comments',
+              data: {},
+              dataType: 'json',
+              success: function (data) {
+                console.log(data)
+              }
+            })
+          },
+          getlocalinfo() {
+            const list = JSON.parse(localStorage.getItem('cmts') || '[]')
+            this.list = list
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
