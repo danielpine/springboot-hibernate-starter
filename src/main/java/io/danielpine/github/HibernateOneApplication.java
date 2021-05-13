@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.rest.webmvc.config.RepositoryRestMvcConfiguration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -24,6 +25,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
+import java.util.concurrent.Executor;
 
 @SpringBootApplication
 @EnableJpaRepositories
@@ -53,6 +55,28 @@ public class HibernateOneApplication {
     public Binding logDirectBinding() {
         return BindingBuilder.bind(logDirectQueue()).to(logDirectExchange()).with("logDirectQueue");
     }
+
+    @Bean("taskExecutor")
+    public Executor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        // 设置核心线程数
+        executor.setCorePoolSize(5);
+        // 设置最大线程数
+        executor.setMaxPoolSize(20);
+        //配置队列大小
+        executor.setQueueCapacity(Integer.MAX_VALUE);
+        // 设置线程活跃时间（秒）
+        executor.setKeepAliveSeconds(60);
+        // 设置默认线程名称
+        executor.setThreadNamePrefix("t-");
+        // 等待所有任务结束后再关闭线程池
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        //执行初始化
+        executor.initialize();
+        return executor;
+    }
+
+
 }
 
 @Component

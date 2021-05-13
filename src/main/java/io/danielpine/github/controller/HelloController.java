@@ -1,6 +1,8 @@
 package io.danielpine.github.controller;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,38 +18,39 @@ import io.danielpine.github.repository.DeskGroupRepository;
 
 @RestController
 public class HelloController {
-	private final static Logger log = LoggerFactory.getLogger(HelloController.class);
-	@Autowired
-	private DeskGroupRepository deskGroupRepository;
+    private final static Logger log = LoggerFactory.getLogger(HelloController.class);
+    @Autowired
+    private DeskGroupRepository deskGroupRepository;
+    @Autowired
+    private Executor taskExecutor;
 
-	@RequestMapping(value = "/hello", method = RequestMethod.GET)
-	public String hello() {
-		log.info("this is info log");
-		log.error("this is error log");
-		log.debug("this is debug log");
-		log.warn("this is warn log");
-		log.trace("this is trace log");
-		log.trace("this is trace log");
-		log.trace("this is trace log");
-		log.trace("this is trace log");
-		hi();
-		return "Hello Hibenate!";
-	}
+    @RequestMapping(value = "/hello", method = RequestMethod.GET)
+    public String hello() {
+        log.info("this is info log");
+        log.error("this is error log");
+        log.warn("this is warn log");
+        hi();
+        return "Hello Hibenate!";
+    }
 
-	public String hi() {
-		log.trace("this is trace log");
-		return "Hello Hibenate!";
-	}
+    public String hi() {
+        IntStream.range(0, 10).forEach(i -> {
+            taskExecutor.execute(() -> {
+                log.info("this is trace log {}", i);
+            });
+        });
+        return "Hello Hibenate!";
+    }
 
-	@RequestMapping("/user/{username}")
-	@ResponseBody
-	public String getUerBlog(@PathVariable String username) {
-		return "user: " + username;
-	}
+    @RequestMapping("/user/{username}")
+    @ResponseBody
+    public String getUerBlog(@PathVariable String username) {
+        return "user: " + username;
+    }
 
-	@RequestMapping(value = "/all", method = RequestMethod.GET)
-	public List<DeskGroup> all() {
-		List<DeskGroup> findAll = deskGroupRepository.findAll();
-		return findAll;
-	}
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    public List<DeskGroup> all() {
+        List<DeskGroup> findAll = deskGroupRepository.findAll();
+        return findAll;
+    }
 }

@@ -1,7 +1,5 @@
 package io.danielpine.github.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 import java.util.List;
 
@@ -14,17 +12,18 @@ public class Comment {
 
     private Long articleId;
 
-    private Long commentFromUid;
+    private String commentType;
 
-    private Long commentToUid;
+    private String user;
+
+    private String toUser;
 
     private String content;
 
     @ManyToOne
-    @JsonIgnore
     private Comment root;
 
-    @OneToMany(mappedBy = "root", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "root", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> sub;
 
     public Long getId() {
@@ -35,14 +34,6 @@ public class Comment {
         this.id = id;
     }
 
-    public Long getCommentFromUid() {
-        return commentFromUid;
-    }
-
-    public void setCommentFromUid(Long commentFromUid) {
-        this.commentFromUid = commentFromUid;
-    }
-
     public Long getArticleId() {
         return articleId;
     }
@@ -51,13 +42,6 @@ public class Comment {
         this.articleId = articleId;
     }
 
-    public Long getCommentToUid() {
-        return commentToUid;
-    }
-
-    public void setCommentToUid(Long commentToUid) {
-        this.commentToUid = commentToUid;
-    }
 
     public String getContent() {
         return content;
@@ -81,5 +65,30 @@ public class Comment {
 
     public void setSub(List<Comment> sub) {
         this.sub = sub;
+    }
+
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getToUser() {
+        return toUser;
+    }
+
+    public void setToUser(String toUser) {
+        this.toUser = toUser;
+    }
+
+    public String getCommentType() {
+        return commentType;
+    }
+
+    public void setCommentType(String commentType) {
+        this.commentType = commentType;
     }
 }

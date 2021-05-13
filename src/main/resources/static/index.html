@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css"
+      href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
     />
     <link
       rel="stylesheet"
@@ -19,7 +19,12 @@
   <body>
     <!-- 评论列表展示区域 -->
     <div id="app-listcomments" style="width: 80%; margin: auto">
-      <publish @func="getlocalinfo"></publish>
+      <publish @func="getComment" :post-comment="postComment"></publish>
+      <br />
+      <div class="form-group">
+        <label for="user"> 用户: </label>
+        <input type="text" class="form-control" id="user" v-model="user" />
+      </div>
       <br />
       <div class="container">
         <ul class="list-group">
@@ -30,23 +35,110 @@
               justify-content-between
               align-items-center
             "
+            style="margin: 5px"
             v-for="item in list"
             :key="item.id"
           >
-            {{ item.content }}
-            <span class="badge badge-secondary badge-pill"
-              >{{ item.user }}</span
+            <div>
+              <span>{{ item.user }} :</span>
+              {{ item.content }}
+              <a class="btn btn-link" @mousedown="commentOpen(item.id)">回复</a>
+              <button
+                class="glyphicon glyphicon-trash"
+                style="float: right"
+                v-if="item.user==user"
+                @click="deleteComment(item.id)"
+              />
+            </div>
+            <div
+              v-show="activeReplyCommentId==item.id"
+              style="margin-top: 20px"
             >
+              <textarea
+                style="width: 100%"
+                :placeholder="'回复：'+item.user"
+                maxlength="1000"
+                :ref="item.id"
+                @blur="replyBlur"
+                v-model="activeReplyText[item.id]"
+              ></textarea>
+              <div align="right">
+                <input
+                  type="button"
+                  value="取消回复"
+                  @click="activeReplyCommentId=-1"
+                />
+                <input
+                  type="submit"
+                  value="发表评论"
+                  @mousedown="replyComment(item.user,activeReplyText[item.id],item.id)"
+                />
+              </div>
+            </div>
+            <ul class="list-group">
+              <li
+                class="
+                  list-group-item
+                  d-flex
+                  justify-content-between
+                  align-items-center
+                "
+                style="margin: 5px"
+                v-if="item.sub"
+                v-for="subitem in item.sub"
+                :key="subitem.id"
+              >
+                <div>
+                  <span>{{ subitem.user }} :</span>
+                  {{ subitem.content }}
+                  <a class="btn btn-link" @mousedown="commentOpen(subitem.id)"
+                    >回复</a
+                  >
+                  <button
+                    class="glyphicon glyphicon-trash"
+                    style="float: right"
+                    v-if="subitem.user==user"
+                    :title="subitem.id"
+                    @click="deleteComment(subitem.id)"
+                  />
+                </div>
+                <div
+                  v-show="activeReplyCommentId==subitem.id"
+                  style="margin-top: 20px"
+                >
+                  <textarea
+                    style="width: 100%"
+                    :placeholder="'回复：'+subitem.user"
+                    maxlength="1000"
+                    :ref="subitem.id"
+                    @blur="replyBlur"
+                    v-model="activeReplyText[subitem.id]"
+                  ></textarea>
+                  <div align="right">
+                    <input
+                      type="button"
+                      value="取消回复"
+                      @click="activeReplyCommentId=-1"
+                    />
+                    <input
+                      type="submit"
+                      value="发表评论"
+                      @mousedown="replyComment(subitem.user,activeReplyText[subitem.id],item.id)"
+                    />
+                  </div>
+                </div>
+              </li>
+            </ul>
           </li>
         </ul>
+        {{activeReplyText}} {{list}}
       </div>
     </div>
-
+    <!-- _search?_source=thread_name -->
     <!-- 提交评论的表单组件 -->
     <template id="publish">
       <div>
         <div class="card border-info">
-          <div class="card-header">评论系统</div>
           <div class="card-body">
             <div class="container">
               <form>
@@ -71,13 +163,7 @@
                   type="button"
                   value="评论"
                   class="btn btn-primary"
-                  @click="getinfo"
-                />
-                <input
-                  type="button"
-                  value="发表"
-                  class="btn btn-primary"
-                  @click="postComment"
+                  @click="comment"
                 />
               </form>
             </div>
@@ -87,7 +173,7 @@
     </template>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://www.w3school.com.cn/jquery/jquery-1.11.1.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
@@ -95,100 +181,112 @@
       var publish = {
         data() {
           return {
-            user: '',
+            articleId: 1,
+            user: 1,
+            toUser: 1,
             content: ''
           }
         },
         template: '#publish',
         methods: {
-          postComment() {
-            axios
-              .post('http://localhost:8686/comments', {
-                articleId: 1,
-                commentFromUid: 1,
-                commentToUid: 1,
-                content: '今天天气真好'
-              })
-              .then((res) => {
-                console.log(res) //  处理成功的函数 相当于success
-              })
-              .catch((error) => {
-                console.log(error) //  错误处理 相当于error
-              })
-          },
-          getinfo() {
-            //获得输入框的user及content数据并更新到评论列表
+          comment() {
             if (this.user == '' || this.content == '') {
-              //判断输入框是否为空
               alert('输入框请不要留空白')
             } else {
-              const info = {
-                id: Math.random(),
-                user: this.user,
-                content: this.content
-              } //获取用户输入的数据存到info对象中
-              const list = JSON.parse(localStorage.getItem('cmts') || '[]') //获取localstrage中的数据，字符串类型需要转换为json对象
-              list.push(info) //将得到的info对象的添加到list
-              localStorage.setItem('cmts', JSON.stringify(list)) //将更新好的数据重新添加到localstrage
-              this.user = this.content = '' //清空输入框
-              this.$emit('func') //更新页面的评论列表
+              this.postComment(
+                this.articleId,
+                this.user,
+                this.toUser,
+                this.content,
+                'main'
+              )
+              this.user = this.content = ''
             }
           }
+        },
+        props: {
+          postComment: {}
         }
       }
-      //vue实例部分创建
-      const listcomment = new Vue({
+      const vm = new Vue({
         el: '#app-listcomments',
         data: {
-          list: [
-            {
-              id: Math.random(),
-              user: '林宥嘉',
-              content: '多久了我都没变，爱你这回事整整六年'
-            },
-            {
-              id: Math.random(),
-              user: '华晨宇',
-              content: '看着飞舞的尘埃掉下来'
-            }
-          ],
-          articleId: 1
+          list: [],
+          articleId: 1,
+          activeReplyCommentId: -1,
+          activeReplyText: {},
+          user: 'user1'
         },
         created() {
-          const localinfo = JSON.parse(localStorage.getItem('cmts') || '[]')
-          if (localinfo.length == 0) {
-            const list = this.list
-            localStorage.setItem('cmts', JSON.stringify(list))
-          }
-          this.getlocalinfo()
           this.getComment()
         },
         components: {
           publish: publish
         },
         methods: {
+          replyBlur(e) {
+            console.log(e)
+            this.activeReplyCommentId = -1
+          },
+          commentOpen(id) {
+            let vm = this
+            setTimeout(function () {
+              vm.activeReplyCommentId = id
+            }, 5)
+            setTimeout(function () {
+              $(vm.$refs[id]).focus()
+            }, 10)
+          },
           getComment() {
             axios
-              .get('http://localhost:8686/comments')
+              .get(
+                'http://localhost:8686/comments/search/serach?articleId=1&commentType=main&projection=inlineComment'
+              )
               .then((res) => {
-                console.log(res) //  处理成功的函数 相当于success
+                console.log(res)
+                this.list = res.data._embedded.comments
               })
               .catch((error) => {
-                console.log(error) //  错误处理 相当于error
+                console.log(error)
               })
-            $.ajax({
-              type: 'GET',
-              url: 'http://localhost:8686/comments',
-              data: {},
-              dataType: 'json',
-              success: function (data) {
-                console.log(data)
-              }
-            })
           },
-          getlocalinfo() {
-            const list = JSON.parse(localStorage.getItem('cmts') || '[]')
-            this.list = list
+          replyComment(toUser, content, id) {
+            this.postComment(
+              this.articleId,
+              this.user,
+              toUser,
+              content,
+              'sub',
+              'http://localhost:8686/comments/' + id
+            )
+          },
+          postComment(articleId, user, toUser, content, commentType, id) {
+            axios
+              .post('http://localhost:8686/comments', {
+                articleId: articleId,
+                user: user,
+                toUser: toUser,
+                content: content,
+                commentType: commentType,
+                root: id ? 'http://localhost:8686/comments/' + id : null
+              })
+              .then((res) => {
+                console.log(res)
+                this.getComment()
+              })
+              .catch((error) => {
+                console.log(error)
+              })
+          },
+          deleteComment(id) {
+            axios
+              .delete('http://localhost:8686/comments/' + id)
+              .then((res) => {
+                this.getComment()
+              })
+              .catch((error) => {
+                console.log(error)
+              })
           }
         }
       })
