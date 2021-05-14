@@ -1,0 +1,39 @@
+version: "3"
+services:
+
+  nginx:
+    container_name: my-nginx
+    image: nginx:1.13
+    restart: always
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+
+  mysql:
+    container_name: my-mysql
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: demo
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
+    volumes:
+      - /root/database/mysql:/var/lib/mysql
+    restart: always
+
+  app:
+    container_name: my-app
+    build: .
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - ~/.m2:/root/.m2
+    expose:
+      - "8080"
+    depends_on:
+      - nginx
+      - mysql
+    command: mvn clean spring-boot:run -Dspring-boot.run.profiles=docker
