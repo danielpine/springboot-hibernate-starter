@@ -1,295 +1,399 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <link
-      rel="stylesheet"
-      href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
+            rel="stylesheet"
+            href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
     />
     <link
-      rel="stylesheet"
-      href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+            rel="stylesheet"
+            href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
     <title>Title</title>
-  </head>
+    <style>
+        .date {
+            margin-left: 8px;
+            font-size: 12px;
+            color: #6b6b6b;
+        }
 
-  <body>
-    <!-- 评论列表展示区域 -->
-    <div id="app-listcomments" style="width: 80%; margin: auto">
-      <publish @func="getComment" :post-comment="postComment"></publish>
-      <br />
-      <div class="form-group">
-        <label for="user"> 用户: </label>
-        <input type="text" class="form-control" id="user" v-model="user" />
-      </div>
-      <br />
-      <div class="container">
+        .name {
+            margin-left: 0;
+            margin-right: 10px;
+            font-size: 14px;
+            font-weight: 400;
+            color: #555666;
+        }
+
+        .comment {
+            color: #222226;
+            word-break: break-all;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+<!-- 评论列表展示区域 -->
+<div id="app-listcomments" v-cloak style="width: 80%; margin: auto">
+    <publish @func="getComment" :post-comment="postComment"></publish>
+    <br/>
+    <div class="container">
+        <div class="form-group">
+            <label for="user"> 用户: </label>
+            <input type="text" class="form-control" id="user" v-model="user"/>
+        </div>
+        <br/>
         <ul class="list-group">
-          <li
-            class="
+            <li
+                    class="
               list-group-item
               d-flex
               justify-content-between
               align-items-center
             "
-            style="margin: 5px"
-            v-for="item in list"
-            :key="item.id"
-          >
-            <div>
-              <span>{{ item.user }} :</span>
-              {{ item.content }}
-              <a class="btn btn-link" @mousedown="commentOpen(item.id)">回复</a>
-              <button
-                class="glyphicon glyphicon-trash"
-                style="float: right"
-                v-if="item.user==user"
-                @click="deleteComment(item.id)"
-              />
-            </div>
-            <div
-              v-show="activeReplyCommentId==item.id"
-              style="margin-top: 20px"
+                    style="margin: 5px"
+                    v-for="item in list"
+                    :key="item.id"
             >
-              <textarea
-                style="width: 100%"
-                :placeholder="'回复：'+item.user"
-                maxlength="1000"
-                :ref="item.id"
-                @blur="replyBlur"
-                v-model="activeReplyText[item.id]"
-              ></textarea>
-              <div align="right">
-                <input
-                  type="button"
-                  value="取消回复"
-                  @click="activeReplyCommentId=-1"
-                />
-                <input
-                  type="submit"
-                  value="发表评论"
-                  @mousedown="replyComment(item.user,activeReplyText[item.id],item.id)"
-                />
-              </div>
-            </div>
-            <ul class="list-group">
-              <li
-                class="
+                <div>
+                    <span class="name">{{ item.user }} :</span>
+                    <span class="comment">
+                        {{ item.content }}
+                    </span>
+                    <span class="date">
+                       {{getDateDuration(new Date(item.createTime))}}
+                    </span>
+                    <label :for="'content_reply_'+item.id">
+                        <a class="btn btn-link" @mousedown="commentOpen(item.id)">回复</a>
+                    </label>
+                    <button
+                            class="glyphicon glyphicon-trash btn btn-link"
+                            style="float: right"
+                            v-if="item.user==user"
+                            @click="deleteComment(item.id)"
+                    />
+                </div>
+                <div
+                        v-show="activeReplyCommentId==item.id"
+                        style="margin-top: 20px"
+                >
+                    <form>
+                        <div class="form-group">
+                        <textarea
+                                :id="'content_reply_'+item.id"
+                                class="form-control"
+                                :placeholder="'回复：'+item.user"
+                                maxlength="1000"
+                                :ref="item.id"
+                                @blur="replyBlur"
+                                v-model="activeReplyText[item.id]"
+                        ></textarea>
+                        </div>
+                        <div align="right">
+                            <input
+                                    type="button"
+                                    style="margin-right: 20px;"
+                                    class="btn btn-warn"
+                                    value="取消回复"
+                                    @click="activeReplyCommentId=-1"
+                            />
+                            <input
+                                    class="btn btn-primary"
+                                    type="submit"
+                                    value="发表评论"
+                                    @mousedown="replyComment(item.user,activeReplyText[item.id],item.id)"
+                            /></div>
+                    </form>
+                </div>
+                <ul class="list-group">
+                    <li
+                            class="
                   list-group-item
                   d-flex
                   justify-content-between
                   align-items-center
                 "
-                style="margin: 5px"
-                v-if="item.sub"
-                v-for="subitem in item.sub"
-                :key="subitem.id"
-              >
-                <div>
-                  <span>{{ subitem.user }} :</span>
-                  {{ subitem.content }}
-                  <a class="btn btn-link" @mousedown="commentOpen(subitem.id)"
-                    >回复</a
-                  >
-                  <button
-                    class="glyphicon glyphicon-trash"
-                    style="float: right"
-                    v-if="subitem.user==user"
-                    :title="subitem.id"
-                    @click="deleteComment(subitem.id)"
-                  />
-                </div>
-                <div
-                  v-show="activeReplyCommentId==subitem.id"
-                  style="margin-top: 20px"
-                >
-                  <textarea
-                    style="width: 100%"
-                    :placeholder="'回复：'+subitem.user"
-                    maxlength="1000"
-                    :ref="subitem.id"
-                    @blur="replyBlur"
-                    v-model="activeReplyText[subitem.id]"
-                  ></textarea>
-                  <div align="right">
-                    <input
-                      type="button"
-                      value="取消回复"
-                      @click="activeReplyCommentId=-1"
-                    />
-                    <input
-                      type="submit"
-                      value="发表评论"
-                      @mousedown="replyComment(subitem.user,activeReplyText[subitem.id],item.id)"
-                    />
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </li>
+                            v-for="subitem in item.sub"
+                            :key="subitem.id"
+                            style="margin: 5px">
+                        <div>
+                            <span class="name">{{ subitem.user }} 回复 {{ subitem.toUser==subitem.user?'':subitem.toUser }} :</span>
+                            <span class="comment">
+                                {{ subitem.content }}
+                            </span>
+                            <span class="date">
+                            {{getDateDuration(new Date(subitem.createTime))}}
+                            </span>
+                            <label :for="'content_reply_'+subitem.id">
+                                <a class="btn btn-link"
+                                   @mousedown="commentOpen(subitem.id)"
+                                >回复</a>
+                            </label>
+                            <button
+                                    class="glyphicon glyphicon-trash btn btn-link"
+                                    style="float: right"
+                                    v-if="subitem.user==user"
+                                    :title="subitem.id"
+                                    @click="deleteComment(subitem.id)"
+                            />
+                        </div>
+                        <div
+                                v-show="activeReplyCommentId==subitem.id"
+                                style="margin-top: 20px"
+                        >
+                            <div class="form-group">
+                                <textarea
+                                        :id="'content_reply_'+subitem.id"
+                                        class="form-control"
+                                        :placeholder="'回复：'+subitem.user"
+                                        maxlength="1000"
+                                        :ref="subitem.id"
+                                        @blur="replyBlur"
+                                        v-model="activeReplyText[subitem.id]"
+                                ></textarea>
+                            </div>
+                            <div align="right">
+                                <form>
+                                    <input
+                                            type="button"
+                                            style="margin-right: 20px;"
+                                            class="btn btn-warn"
+                                            value="取消回复"
+                                            @click="activeReplyCommentId=-1"
+                                    />
+                                    <input
+                                            class="btn btn-primary"
+                                            type="submit"
+                                            value="发表评论"
+                                            @mousedown="replyComment(subitem.user,activeReplyText[subitem.id],item.id)"
+                                    /></form>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </li>
         </ul>
         {{activeReplyText}} {{list}}
-      </div>
     </div>
-    <!-- _search?_source=thread_name -->
-    <!-- 提交评论的表单组件 -->
-    <template id="publish">
-      <div>
+</div>
+<!-- _search?_source=thread_name -->
+<!-- 提交评论的表单组件 -->
+<template id="publish">
+    <div>
         <div class="card border-info">
-          <div class="card-body">
-            <div class="container">
-              <form>
-                <div class="form-group">
-                  <label for="user"> 评论人: </label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="user"
-                    v-model="user"
-                  />
+            <div class="card-body">
+                <div class="container">
+                    <form>
+                        <div class="form-group">
+                            <label for="user"> 评论人: </label>
+                            <input
+                                    type="text"
+                                    class="form-control"
+                                    v-model="user"
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="content"> 评论内容: </label>
+                            <textarea
+                                    id="content"
+                                    class="form-control"
+                                    v-model="content"
+                            ></textarea>
+                        </div>
+                        <input
+                                type="button"
+                                value="评论"
+                                class="btn btn-primary"
+                                @click="comment"
+                        />
+                    </form>
                 </div>
-                <div class="form-group">
-                  <label for="content"> 评论内容: </label>
-                  <textarea
-                    id="content"
-                    class="form-control"
-                    v-model="content"
-                  ></textarea>
-                </div>
-                <input
-                  type="button"
-                  value="评论"
-                  class="btn btn-primary"
-                  @click="comment"
-                />
-              </form>
             </div>
-          </div>
         </div>
-      </div>
-    </template>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
-    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://www.w3school.com.cn/jquery/jquery-1.11.1.min.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script>
-      //组件创建（使用局部组件方式）
-      var publish = {
+    </div>
+</template>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://www.w3school.com.cn/jquery/jquery-1.11.1.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="./js/utils.js"></script>
+<script>
+    //组件创建（使用局部组件方式）
+    var publish = {
         data() {
-          return {
-            articleId: 1,
-            user: 1,
-            toUser: 1,
-            content: ''
-          }
+            return {
+                articleId: 1,
+                user: 'user',
+                toUser: 'user',
+                content: ''
+            }
         },
         template: '#publish',
         methods: {
-          comment() {
-            if (this.user == '' || this.content == '') {
-              alert('输入框请不要留空白')
-            } else {
-              this.postComment(
-                this.articleId,
-                this.user,
-                this.toUser,
-                this.content,
-                'main'
-              )
-              this.user = this.content = ''
+            comment() {
+                if (this.user == '' || this.content == '') {
+                    alert('输入框请不要留空白')
+                } else {
+                    this.postComment(
+                        this.articleId,
+                        this.user,
+                        this.toUser,
+                        this.content,
+                        'main'
+                    )
+                    this.user = this.content = ''
+                }
             }
-          }
         },
         props: {
-          postComment: {}
+            postComment: {}
         }
-      }
-      const vm = new Vue({
+    }
+    const vm = new Vue({
         el: '#app-listcomments',
         data: {
-          list: [],
-          articleId: 1,
-          activeReplyCommentId: -1,
-          activeReplyText: {},
-          user: 'user1'
+            list: [],
+            articleId: 1,
+            activeReplyCommentId: -1,
+            activeReplyText: {},
+            user: 'user1'
         },
         created() {
-          this.getComment()
+            this.getComment()
         },
         components: {
-          publish: publish
+            publish: publish
         },
         methods: {
-          replyBlur(e) {
-            console.log(e)
-            this.activeReplyCommentId = -1
-          },
-          commentOpen(id) {
-            let vm = this
-            setTimeout(function () {
-              vm.activeReplyCommentId = id
-            }, 5)
-            setTimeout(function () {
-              $(vm.$refs[id]).focus()
-            }, 10)
-          },
-          getComment() {
-            axios
-              .get(
-                'http://localhost:8686/comments/search/serach?articleId=1&commentType=main&projection=inlineComment'
-              )
-              .then((res) => {
-                console.log(res)
-                this.list = res.data._embedded.comments
-              })
-              .catch((error) => {
-                console.log(error)
-              })
-          },
-          replyComment(toUser, content, id) {
-            this.postComment(
-              this.articleId,
-              this.user,
-              toUser,
-              content,
-              'sub',
-              'http://localhost:8686/comments/' + id
-            )
-          },
-          postComment(articleId, user, toUser, content, commentType, id) {
-            axios
-              .post('http://localhost:8686/comments', {
-                articleId: articleId,
-                user: user,
-                toUser: toUser,
-                content: content,
-                commentType: commentType,
-                root: id ? 'http://localhost:8686/comments/' + id : null
-              })
-              .then((res) => {
-                console.log(res)
-                this.getComment()
-              })
-              .catch((error) => {
-                console.log(error)
-              })
-          },
-          deleteComment(id) {
-            axios
-              .delete('http://localhost:8686/comments/' + id)
-              .then((res) => {
-                this.getComment()
-              })
-              .catch((error) => {
-                console.log(error)
-              })
-          }
+            replyBlur(e) {
+                console.log(e)
+                this.activeReplyCommentId = -1
+            },
+            commentOpen(id) {
+                let vm = this
+                setTimeout(function () {
+                    vm.activeReplyCommentId = id
+                }, 5)
+                setTimeout(function () {
+                    $(vm.$refs[id]).focus()
+                }, 10)
+            },
+            getComment() {
+                axios
+                    .get(
+                        'http://localhost:8686/comments/search/serach?articleId=1&commentType=main&projection=inlineComment'
+                    )
+                    .then((res) => {
+                        console.log(res)
+                        this.list = res.data._embedded.comments
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+            },
+            replyComment(toUser, content, id) {
+                this.postComment(
+                    this.articleId,
+                    this.user,
+                    toUser,
+                    content,
+                    'sub',
+                    'http://localhost:8686/comments/' + id
+                )
+            },
+            postComment(articleId, user, toUser, content, commentType, id) {
+                axios
+                    .post('http://localhost:8686/comments', {
+                        articleId: articleId,
+                        user: user,
+                        toUser: toUser,
+                        content: content,
+                        commentType: commentType,
+                        root: id ? 'http://localhost:8686/comments/' + id : null
+                    })
+                    .then((res) => {
+                        console.log(res)
+                        this.getComment()
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+            },
+            deleteComment(id) {
+                axios
+                    .delete('http://localhost:8686/comments/' + id)
+                    .then((res) => {
+                        this.getComment()
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+            },
+            getDateDuration(date) {
+                let d_seconds,
+                    d_minutes,
+                    d_hours,
+                    d_days,
+                    timeNow = parseInt(new Date().getTime() / 1000),
+                    d,
+                    Y = date.getFullYear(),
+                    M = date.getMonth() + 1,
+                    D = date.getDate(),
+                    H = date.getHours(),
+                    m = date.getMinutes(),
+                    s = date.getSeconds();
+                //小于10的在前面补0
+                if (M < 10) {
+                    M = '0' + M;
+                }
+                if (D < 10) {
+                    D = '0' + D;
+                }
+                if (H < 10) {
+                    H = '0' + H;
+                }
+                if (m < 10) {
+                    m = '0' + m;
+                }
+                if (s < 10) {
+                    s = '0' + s;
+                }
+
+                d = timeNow - date / 1000;
+                d_days = parseInt(d / 86400);
+                d_hours = parseInt(d / 3600);
+                d_minutes = parseInt(d / 60);
+                d_seconds = parseInt(d);
+
+                if (d_days > 0 && d_days < 3) {
+                    return d_days + '天前';
+                } else if (d_days <= 0 && d_hours > 0) {
+                    return d_hours + '小时前';
+                } else if (d_hours <= 0 && d_minutes > 0) {
+                    return d_minutes + '分钟前';
+                } else if (d_seconds < 60) {
+                    if (d_seconds <= 0) {
+                        return '刚刚';
+                    } else {
+                        return d_seconds + '秒前';
+                    }
+                } else if (d_days >= 3 && d_days < 30) {
+                    return M + '-' + D + ' ' + H + ':' + m;
+                } else if (d_days >= 30) {
+                    return Y + '-' + M + '-' + D + ' ' + H + ':' + m;
+                }
+            }
         }
-      })
-    </script>
-  </body>
+    })
+</script>
+</body>
 </html>

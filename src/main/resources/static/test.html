@@ -1,0 +1,53 @@
+<li
+        class="
+                  list-group-item
+                  d-flex
+                  justify-content-between
+                  align-items-center
+                "
+        style="margin: 5px">
+    <div>
+        <span class="name">{{ subitem.user }} 回复 {{ subitem.toUser==subitem.user?'':subitem.toUser }} :</span>
+        <span class="comment">
+                                {{ subitem.content }}
+                            </span>
+        <span class="date">
+                            {{getDateDuration(new Date(item.createTime))}}
+                            </span>
+        <a class="btn btn-link" @mousedown="commentOpen(subitem.id)"
+        >回复</a
+        >
+        <button
+                class="glyphicon glyphicon-trash"
+                style="float: right"
+                v-if="subitem.user==user"
+                :title="subitem.id"
+                @click="deleteComment(subitem.id)"
+        />
+    </div>
+    <div
+            v-show="activeReplyCommentId==subitem.id"
+            style="margin-top: 20px"
+    >
+                  <textarea
+                          style="width: 100%"
+                          :placeholder="'回复：'+subitem.user"
+                          maxlength="1000"
+                          :ref="subitem.id"
+                          @blur="replyBlur"
+                          v-model="activeReplyText[subitem.id]"
+                  ></textarea>
+        <div align="right">
+            <input
+                    type="button"
+                    value="取消回复"
+                    @click="activeReplyCommentId=-1"
+            />
+            <input
+                    type="submit"
+                    value="发表评论"
+                    @mousedown="replyComment(subitem.user,activeReplyText[subitem.id],item.id)"
+            />
+        </div>
+    </div>
+</li>

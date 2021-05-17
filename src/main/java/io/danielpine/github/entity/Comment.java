@@ -1,6 +1,9 @@
 package io.danielpine.github.entity;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -19,6 +22,10 @@ public class Comment {
     private String toUser;
 
     private String content;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreationTimestamp
+    private Date createTime;
 
     @ManyToOne
     private Comment root;
@@ -41,7 +48,6 @@ public class Comment {
     public void setArticleId(Long articleId) {
         this.articleId = articleId;
     }
-
 
     public String getContent() {
         return content;
@@ -67,6 +73,13 @@ public class Comment {
         this.sub = sub;
     }
 
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
 
     public String getUser() {
         return user;
