@@ -34,6 +34,7 @@ public class HelloController {
     }
 
     public String hi() {
+        log.info("this is hi()");
         IntStream.range(0, 10).forEach(i -> {
             taskExecutor.execute(() -> {
                 log.info("this is trace log {}", i);
