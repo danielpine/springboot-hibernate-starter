@@ -34,3 +34,4 @@ build/
 
 /.mvn
 /compose/elasticsearch-logstash-kibana-zipkin/elasticsearch/data/
+/compose/rabbit-redis/rabbitmq/mnesia

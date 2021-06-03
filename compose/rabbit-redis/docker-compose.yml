@@ -1,0 +1,27 @@
+version: '2'
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: docker_rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Asia/Shanghai
+    restart: always
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      - "61613:61613"
+    volumes:
+      - ./rabbitmq/:/var/lib/rabbitmq
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+  redis:
+    image: redis:latest
+    container_name: docker_redis
+    ports:
+      - 6379:6379
